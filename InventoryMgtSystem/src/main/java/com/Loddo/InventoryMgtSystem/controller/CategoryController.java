@@ -1,8 +1,13 @@
 package com.Loddo.InventoryMgtSystem.controller;
 
+import com.Loddo.InventoryMgtSystem.dtos.CategoryDto;
+import com.Loddo.InventoryMgtSystem.model.Category;
+import com.Loddo.InventoryMgtSystem.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
@@ -10,83 +15,91 @@ import java.util.*;
 @RequestMapping("/category")
 public class CategoryController {
 
-    // ✅ Phase-1 dummy data store (later MongoDB)
-    private final List<Map<String, Object>> categories = new ArrayList<>();
+    @Autowired
+    private CategoryService categoryService; // ✅ Real MongoDB Service
 
-    public CategoryController() {
-        // dummy initial categories
-        categories.add(createCategory(1, "Electronics"));
-        categories.add(createCategory(2, "Grocery"));
-        categories.add(createCategory(3, "Fashion"));
-    }
-
-    private Map<String, Object> createCategory(int id, String name) {
-        Map<String, Object> cat = new HashMap<>();
-        cat.put("id", id);
-        cat.put("name", name);
-        return cat;
-    }
-
-    // ✅ GET: show category page
+    // ✅ GET: Show category page with list and optional edit mode
     @GetMapping
     public String categoryPage(
-            @RequestParam(required = false) Integer editId,
+            @RequestParam(required = false) String editId,
             Model model
     ) {
         model.addAttribute("title", "Category");
         model.addAttribute("content", "pages/category :: content");
+
+        // Fetch all categories from MongoDB
+        List<CategoryDto> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
 
         if (editId != null) {
-            categories.stream()
-                    .filter(c -> c.get("id").equals(editId))
-                    .findFirst()
-                    .ifPresent(cat -> {
-                        model.addAttribute("isEditing", true);
-                        model.addAttribute("editingCategoryId", editId);
-                        model.addAttribute("categoryName", cat.get("name"));
-                    });
+            // Find the category to edit by its MongoDB ID
+            CategoryDto category = categoryService.getCategoryById(editId);
+            if (category != null) {
+                model.addAttribute("isEditing", true);
+                model.addAttribute("editingCategoryId", editId);
+                model.addAttribute("categoryName", category.getName());
+            }
         } else {
             model.addAttribute("isEditing", false);
             model.addAttribute("categoryName", "");
         }
 
-        return "layout";
+        return "layout"; // ✅ Thymeleaf layout pattern
     }
 
-    // ✅ POST: Add Category
+    // ✅ POST: Add Category to MongoDB
     @PostMapping("/add")
-    public String addCategory(@RequestParam String name) {
+    public String addCategory(@RequestParam String name, RedirectAttributes ra) {
 
         if (name == null || name.trim().isEmpty()) {
-            return "redirect:/category?error=Category%20name%20cannot%20be%20empty";
+            ra.addFlashAttribute("error", "Category name cannot be empty");
+            return "redirect:/category";
+        }
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName(name);
+        try {
+            categoryService.saveCategory(categoryDto); // ✅ Matches your Service implementation
+            ra.addFlashAttribute("message", "Category successfully added ✅");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error adding category: " + e.getMessage());
         }
 
-        int newId = categories.size() + 1;
-        categories.add(createCategory(newId, name));
-
-        return "redirect:/category?message=Category%20successfully%20added";
+        return "redirect:/category";
     }
 
-    // ✅ POST: Update Category
+    // ✅ POST: Update Existing Category in MongoDB
     @PostMapping("/update")
-    public String updateCategory(@RequestParam Integer id,
-                                 @RequestParam String name) {
+    public String updateCategory(@RequestParam String id, @RequestParam String name, RedirectAttributes ra) {
 
-        categories.stream()
-                .filter(c -> c.get("id").equals(id))
-                .findFirst()
-                .ifPresent(cat -> cat.put("name", name));
+        if (name == null || name.trim().isEmpty()) {
+            ra.addFlashAttribute("error", "Category name cannot be empty");
+            return "redirect:/category";
+        }
 
-        return "redirect:/category?message=Category%20successfully%20updated";
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName(name);
+
+        try {
+            categoryService.updateCategory(id, categoryDto); // ✅ Uses Service update logic
+            ra.addFlashAttribute("message", "Category successfully updated ✅");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to update: " + e.getMessage());
+        }
+
+        return "redirect:/category";
     }
 
-    // ✅ POST: Delete Category
+    // ✅ POST: Delete Category from MongoDB
     @PostMapping("/delete")
-    public String deleteCategory(@RequestParam Integer id) {
+    public String deleteCategory(@RequestParam String id, RedirectAttributes ra) {
 
-        categories.removeIf(c -> c.get("id").equals(id));
+        try {
+            categoryService.deleteCategory(id); // ✅ Real delete operation
+            ra.addFlashAttribute("message", "Category successfully deleted ✅");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Could not delete category: " + e.getMessage());
+        }
 
-        return "redirect:/category?message=Category%20successfully%20deleted";
+        return "redirect:/category";
     }
 }

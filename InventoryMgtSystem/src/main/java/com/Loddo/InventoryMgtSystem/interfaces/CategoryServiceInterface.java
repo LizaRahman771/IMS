@@ -5,6 +5,8 @@ import com.Loddo.InventoryMgtSystem.dtos.CategoryDto;
 import java.util.List;
 
 public interface CategoryServiceInterface {
+    CategoryDto saveCategory(CategoryDto categoryDto);
+
     CategoryDto createCategory(CategoryDto categoryDto);
     List<CategoryDto> getAllCategories();
     CategoryDto getCategoryById(String id);

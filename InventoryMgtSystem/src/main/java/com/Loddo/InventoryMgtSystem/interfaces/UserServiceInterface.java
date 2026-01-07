@@ -7,9 +7,13 @@ import com.Loddo.InventoryMgtSystem.dtos.UserDto;
 import com.Loddo.InventoryMgtSystem.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserServiceInterface {
     User registerUser(RegisterRequest registerRequest);
+
+    Optional<User> findByEmail(String email);
+
     User loginUser(LoginRequest loginRequest);
     List<UserDto> getAllUsers();
     User getCurrentLoggedInUser();

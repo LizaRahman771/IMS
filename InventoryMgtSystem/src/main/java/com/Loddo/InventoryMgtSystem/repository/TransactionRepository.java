@@ -1,0 +1,15 @@
+package com.Loddo.InventoryMgtSystem.repository;
+
+import com.Loddo.InventoryMgtSystem.model.Transaction;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface TransactionRepository extends MongoRepository<Transaction, String> {
+    List<Transaction> findByProductIdAndTransactionTypeOrderByCreatedAtAsc(String productId, String transactionType);
+
+    List<Transaction> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Transaction> findByUserId(String userId);
+}
