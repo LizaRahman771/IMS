@@ -9,46 +9,37 @@ public class Product {
     @Id
     private String id;
     private String name;
-    private String sku;
+    private String categoryId;
+    private String brand; // Added per Section 4.2 [cite: 125]
     private BigDecimal price;
     private Integer stockQuantity;
-    private String categoryId;
+    private String supplierId; // Reference to the User with SUPPLIER role [cite: 128, 129]
+    private String sku;
     private String description;
-    private String imageUrl;
     private Integer reorderLevel;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Product() {
-    }
-
-    public Product(String name, String sku, BigDecimal price, Integer stockQuantity, String categoryId) {
-        this.name = name;
-        this.sku = sku;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-        this.categoryId = categoryId;
-        this.createdAt = LocalDateTime.now();
-    }
+    public Product() {}
 
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    public String getSku() { return sku; }
-    public void setSku(String sku) { this.sku = sku; }
+    public String getCategoryId() { return categoryId; }
+    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
     public Integer getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
-    public String getCategoryId() { return categoryId; }
-    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
+    public String getSupplierId() { return supplierId; }
+    public void setSupplierId(String supplierId) { this.supplierId = supplierId; }
+    public String getSku() { return sku; }
+    public void setSku(String sku) { this.sku = sku; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public Integer getReorderLevel() { return reorderLevel; }
     public void setReorderLevel(Integer reorderLevel) { this.reorderLevel = reorderLevel; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

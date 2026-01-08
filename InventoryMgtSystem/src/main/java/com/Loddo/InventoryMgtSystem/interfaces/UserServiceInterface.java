@@ -14,10 +14,13 @@ public interface UserServiceInterface {
 
     Optional<User> findByEmail(String email);
 
-    User loginUser(LoginRequest loginRequest);
-    List<UserDto> getAllUsers();
+    List<UserDto> getUsersByRole(UserDto.Role role);
+
     User getCurrentLoggedInUser();
+
     User getUserById(String id);
+
     User updateUser(String id, UserDto userDto);
+
     void deleteUser(String id);
 }

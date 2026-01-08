@@ -23,11 +23,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        // Allow public access to auth pages and static resources
+                        // Publicly accessible resources
                         .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-                        // Restrict Admin-specific tools
-                        .requestMatchers("/category/**", "/supplier/**").hasRole("ADMIN")
-                        // All other requests require authentication
+
+                        // Roles updated based on Project Plan Section 4.1
+                        // Suppliers manage overall availability and high-level forecasting
+                        .requestMatchers("/supplier/**", "/api/forecast/supplier/**").hasRole("SUPPLIER")
+
+                        // Sellers manage local inventory and receive product-level predictions
+                        .requestMatchers("/sell/**", "/api/forecast/seller/**").hasRole("SELLER")
+
+                        // Common dashboard and general prediction tools for both roles
+                        .requestMatchers("/dashboard/**", "/api/forecast/**").hasAnyRole("SUPPLIER", "SELLER")
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -42,13 +50,13 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout=true")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.disable()); // Standard for this pattern
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
 
     /**
-     * ✅ This is the PasswordEncoder used by your UserService to secure passwords.
+     * Standard encoder for securing passwords in the User model.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -56,7 +64,8 @@ public class SecurityConfig {
     }
 
     /**
-     * ✅ Connects Spring Security to your MongoDB UserRepository.
+     * Configured to use the specific SUPPLIER/SELLER roles from the User model.
+     * Based on Project Plan Section 4.1.
      */
     @Bean
     public UserDetailsService userDetailsService() {
@@ -64,7 +73,8 @@ public class SecurityConfig {
                 .map(user -> org.springframework.security.core.userdetails.User.builder()
                         .username(user.getEmail())
                         .password(user.getPassword())
-                        .roles(user.getRole()) // Dynamically loads ADMIN or STAFF role
+                        // user.getRole() must return the name of the Enum (SUPPLIER or SELLER)
+                        .roles(user.getRole().name())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }}

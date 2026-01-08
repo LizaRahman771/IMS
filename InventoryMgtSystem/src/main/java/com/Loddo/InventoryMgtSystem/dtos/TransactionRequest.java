@@ -3,11 +3,12 @@ package com.Loddo.InventoryMgtSystem.dtos;
 import jakarta.validation.constraints.Positive;
 
 public class TransactionRequest {
-    @Positive(message = "Product ID is required")
     private String productId;
-    @Positive(message = "Quantity is required")
+    private String userId;     // Required field (The Seller ID)
     private Integer quantity;
-    private String supplierId;
+    private String supplierId; // The Supplier ID for Purchases
+    private Double discount;   // Required for ML features [cite: 9]
+    private Boolean promotion; // Required for ML features [cite: 9]
     private String description;
     private String note;
 
@@ -20,7 +21,14 @@ public class TransactionRequest {
         this.description = description;
         this.note = note;
     }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
+    public Double getDiscount() { return discount; }
+    public void setDiscount(Double discount) { this.discount = discount; }
+
+    public Boolean getPromotion() { return promotion; }
+    public void setPromotion(Boolean promotion) { this.promotion = promotion; }
     public String getProductId() {
         return productId;
     }
@@ -60,4 +68,6 @@ public class TransactionRequest {
     public void setNote(String note) {
         this.note = note;
     }
+
+
 }
